@@ -4,12 +4,15 @@
 
 #include <iostream>
 #include <thread>
+#include <chrono>
 
 #include "chat.h"
 
 int main() {
     using namespace chatllm;
-    ModelLoader model_loader {"/Users/robinqu/Workspace/github/robinqu/instinct.cpp/build/modules/instinct-transformer/test/_assets/model_bins/bge-reranker-v2-m3.bin"};
+    using namespace std::chrono_literals;
+
+    ModelLoader model_loader {"/Users/robinqu/Workspace/modelscope/judd2024/chatllm_quantized_models/bge-reranker-m3-q4_1.bin"};
 
     ModelFactory::Result result;
     ModelFactory::load(model_loader, result, {});
@@ -21,13 +24,18 @@ int main() {
     {
         GenerationConfig config;
         config.num_threads = std::thread::hardware_concurrency();
+        const auto t1 = std::chrono::system_clock::now();
         std::cout << result.model->qa_rank(config, ids) << std::endl;
+std::cout << "elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()-t1).count();
     }
 
     {
         GenerationConfig config;
         config.num_threads = 1;
+        const auto t1 = std::chrono::system_clock::now();
         std::cout << result.model->qa_rank(config, ids) << std::endl;
+        std::cout << result.model->qa_rank(config, ids) << std::endl;
+        std::cout << "elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()-t1).count();
     }
 
 
